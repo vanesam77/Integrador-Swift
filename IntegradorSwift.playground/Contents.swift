@@ -1,7 +1,6 @@
 import Foundation
 import UIKit
 
-
 protocol Parkable {
     var plate: String { get }
     var type: VehicleType { get }
@@ -18,8 +17,6 @@ struct Parking {
     var vehicles: Set<Vehicle> = []
     let maxVehicle: Int = 20
     var countOfVehicleHaveCheckedOut = 0
-    var feeAcumulated = 0
-    
     var listOfVehiclesPlates: Set<String> = []
     
     mutating func listVehicles(){
@@ -56,16 +53,17 @@ struct Parking {
     mutating func checkOutVehicle(_ plate: String, onSucces: (Int) -> Void, onError: (Bool) -> Void) {
         
         guard listOfVehiclesPlates.contains(plate) else {
-            print("Sorry, the check-out failed. Plate not found")
+            print("Sorry, the check-out failed. Plate \(plate) not found")
             onError.self(true)
             return
         }
-        
         
         for vehicle in vehicles {
             if vehicle.plate == plate{
                 let vehicleToRemove = vehicle
                 let parkedTime: Int = vehicleToRemove.parkedTime
+                
+                
                 vehicles.remove(vehicleToRemove)
                 listOfVehiclesPlates.remove(plate)
                 countOfVehicleHaveCheckedOut += 1
@@ -81,7 +79,7 @@ struct Parking {
 struct Vehicle: Parkable, Hashable {
     
     let plate: String
-    var type: VehicleType
+    let type: VehicleType
     var checkInTime: Date
     var parkedTime: Int {
         get {
@@ -115,6 +113,8 @@ struct Vehicle: Parkable, Hashable {
             fee = fee - discount
         }
         
+        print("Your fee is $ \(fee). Come back soon")
+        
         return fee
     }
 }
@@ -141,7 +141,6 @@ enum VehicleType {
 //instancias
 
 var alkeParking = Parking()
-
 
 let vehicle1 = Vehicle(plate: "AA111AA", type:VehicleType.car, checkInTime: Date(), discountCard: "DISCOUNT_CARD_001")
 let vehicle2 = Vehicle(plate: "B222BBB", type:VehicleType.moto, checkInTime: Date(), discountCard: nil)
@@ -192,7 +191,17 @@ func AlkeCheckInListOfVehiclesARray() {
             return
         }
     }
-    
+}
+
+var earning = 0
+func checkOutVehicle(vehicle: Vehicle,plate: String, parkedTime: Int, hasDiscountCardBool: Bool){
+    alkeParking.checkOutVehicle(plate) { (s1: Int) in
+        let fee = vehicle.calculateFeeOf(vehicle.type, parkedTime: parkedTime, hasDiscountCard: hasDiscountCardBool)
+        earning = earning + fee
+        return
+    } onError: { (Bool) -> Void in
+        return
+    }
 }
 
 print("CheckIn:----------------------------------")
@@ -203,14 +212,10 @@ print("Patentes ingresadas: \(alkeParking.listOfVehiclesPlates)")
 print("Cantidad de Patentes ingresadas: \(alkeParking.listOfVehiclesPlates.count)")
 
 print("CheckOut:----------------------------------")
-var earning = 0
+
 
 //Test Example with Error
-alkeParking.checkOutVehicle("DD444Go888") { (onSucces: Int) -> Void in
-    return
-} onError: { (Bool) -> Void in
-    return
-}
+checkOutVehicle(vehicle: vehicle18, plate: "zaraza", parkedTime: vehicle18.parkedTime, hasDiscountCardBool: (vehicle18.discountCard != nil))
 
 print("Cantidad de Autos Ingresados: \(alkeParking.vehicles.count)")
 print("Cantidad de Patentes ingresadas: \(alkeParking.listOfVehiclesPlates.count)")
@@ -218,23 +223,9 @@ print("Cantidad de Patentes ingresadas: \(alkeParking.listOfVehiclesPlates.count
 
 //Example with Succes CheckOut
 
-alkeParking.checkOutVehicle(vehicle18.plate) { (s1: Int) -> Void in
-    let fee = vehicle18.calculateFeeOf(_ : vehicle18.type, parkedTime: s1, hasDiscountCard: true)
-    earning = earning + fee
-    print("Your fee is $ \(fee). Come back soon")
-    return
-} onError: { (Bool) -> Void in
-    return
-}
+checkOutVehicle(vehicle: vehicle18, plate: vehicle18.plate, parkedTime: vehicle18.parkedTime, hasDiscountCardBool: (vehicle18.discountCard != nil))
 
-alkeParking.checkOutVehicle(vehicle19.plate) { (s1: Int) -> Void in
-    let fee = vehicle18.calculateFeeOf(_ : vehicle19.type, parkedTime: s1, hasDiscountCard: true)
-    earning = earning + fee
-    print("Your fee is $ \(fee). Come back soon")
-    return
-} onError: { (Bool) -> Void in
-    return
-}
+checkOutVehicle(vehicle: vehicle19, plate: vehicle19.plate, parkedTime: vehicle19.parkedTime, hasDiscountCardBool: (vehicle19.discountCard != nil))
 
 
 
