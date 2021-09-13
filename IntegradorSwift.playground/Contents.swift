@@ -7,6 +7,7 @@ protocol Parkable {
     var checkInTime: Date { get }
     var discountCard: String? { get }
     var parkedTime: Int { get }
+
     
     func calculateFeeOf(_ vehicleType: VehicleType, parkedTime: Int, hasDiscountCard: Bool) -> Int
     
@@ -87,6 +88,7 @@ struct Vehicle: Parkable, Hashable {
         }
     }
     let discountCard: String?
+    
 
     
     func hash(into hasher: inout Hasher) {
@@ -97,12 +99,15 @@ struct Vehicle: Parkable, Hashable {
         return lhs.plate == rhs.plate
     }
     
+
+    
     func calculateFeeOf(_ vehicleType: VehicleType, parkedTime: Int, hasDiscountCard: Bool) -> Int{
         var fee: Int = 0
         let fee2hsParking = vehicleType.parkingRate
         
         if parkedTime > 120 {
-            let parkingTimeExceeded = Int((abs(parkedTime - 120))/15)*5
+            let parkingTimeExceeded = Int(((abs(Double(parkedTime) - 120.0))/15).rounded(.up))*5
+            
             fee = fee2hsParking + parkingTimeExceeded
         } else {
             fee = fee2hsParking
@@ -114,7 +119,6 @@ struct Vehicle: Parkable, Hashable {
         }
         
         print("Your fee is $ \(fee). Come back soon")
-        
         return fee
     }
 }
@@ -241,6 +245,8 @@ var vehiclesCheckedOut = alkeParking.countOfVehicleHaveCheckedOut
 
 
 AdministrateEarning(vehiclesCheckedOut: vehiclesCheckedOut, earnings: earning)
+
+
 
 
 
